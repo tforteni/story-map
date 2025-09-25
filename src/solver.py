@@ -4,8 +4,6 @@ from scipy.optimize import least_squares
 #GET COORDINATES
 
 def get_coords(locations, distances):
-    check_conflicts(distances)
-    
     # Map location names to indices
     loc_index = {loc: i for i, loc in enumerate(locations)}
 
@@ -29,14 +27,22 @@ def get_coords(locations, distances):
         return res
 
     # Initial guess
-    x0 = np.random.rand(len(locations) * 2)
+    # x0 = np.random.rand(len(locations) * 2)
+    x0 = (np.random.rand(len(locations) * 2) - 0.5) * 500
 
     # Anchor first two points
-    x0[0], x0[1] = 0.0, 0.0  # first location at origin
+    # x0[0], x0[1] = 0.0, 0.0  # first location at origin
+    # if len(locations) > 1:
+    #     d = distances.get((locations[0], locations[1]),
+    #                       distances.get((locations[1], locations[0]), 1.0))
+    #     x0[2], x0[3] = d, 0.0  # second location on x-axis
+
     if len(locations) > 1:
         d = distances.get((locations[0], locations[1]),
-                          distances.get((locations[1], locations[0]), 1.0))
-        x0[2], x0[3] = d, 0.0  # second location on x-axis
+                      distances.get((locations[1], locations[0]), 1.0))
+        theta = np.random.rand() * 2 * np.pi
+        x0[2], x0[3] = d * np.cos(theta), d * np.sin(theta)
+    
 
     # Solve
     result = least_squares(residuals, x0)
@@ -47,16 +53,16 @@ def get_coords(locations, distances):
     return coords
 
 def check_conflicts(distances):
+    kept = {}
     conflicts = {}
     for (a, b), d in distances.items():
         key = tuple(sorted((a, b)))  # symmetric pair
-        if key not in conflicts:
-            conflicts[key] = d
+        if key not in kept:
+            kept[key] = d
         else:
-            if not np.isclose(conflicts[key], d, rtol=1e-5, atol=1e-5):
-                print(f"⚠️ Conflict detected between {a} and {b}: "
-                      f"{conflicts[key]} vs {d}")
-                # you could raise an error instead:
-                # raise ValueError(f"Conflict between {a} and {b}: {conflicts[key]} vs {d}")
-    return conflicts
+            if not np.isclose(kept[key], d, rtol=1e-5, atol=1e-5):
+                # print(f"⚠️ Conflict detected between {a} and {b}: "
+                #       f"{kept[key]} vs {d}")
+                conflicts[key] = [kept[key], d]
+    return kept, conflicts
 

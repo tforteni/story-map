@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def plot_map(coords, distances, with_routes):
+def plot_map(coords, distances, conflicts, with_routes):
     plt.figure(figsize=(8, 6))
 
     # draw points
@@ -16,6 +16,10 @@ def plot_map(coords, distances, with_routes):
             plt.plot([xa, xb], [ya, yb], "k--", alpha=0.6)  # dashed line
             midx, midy = (xa+xb)/2, (ya+yb)/2
             plt.text(midx, midy, f"{d:.1f}", fontsize=8, color="gray")
+
+            key = tuple(sorted((a, b)))
+            if key in conflicts:
+                plt.text(xa+0.6, ya+16, "⚠️", fontsize=16, color="red")
 
     plt.title("Fantasy Map with Travel Routes")
     plt.xlabel("X coordinate")
