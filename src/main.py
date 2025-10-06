@@ -15,14 +15,13 @@ def main():
     extractor.pretty_print_travel_info(travel_info)
     # print(travel_info)
 
-    locations = extractor.get_all_locations(travel_info) 
+    locations = extractor.get_all_locations(travel_info) #don't worry about this for now
     all_distances = extractor.get_distances(travel_info)
+    direction_constraints = extractor.get_direction_constraints(travel_info)
 
     (distances, conflicts) = solver.check_conflicts(all_distances)
-    print(distances)
-    #now I need to like iterate over conflicts in coords so that I can make it so that it's flagged on the map okay slay 
 
-    coords = solver.get_coords(locations,distances)
+    coords = solver.get_coords(locations,distances, direction_constraints)
     visualizer. plot_map(coords, distances, conflicts, with_routes)
 
 

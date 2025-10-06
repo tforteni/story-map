@@ -3,7 +3,7 @@ from scipy.optimize import least_squares
 
 #GET COORDINATES
 
-def get_coords(locations, distances):
+def get_coords(locations, distances, direction_constraints):
     # Map location names to indices
     loc_index = {loc: i for i, loc in enumerate(locations)}
 
@@ -16,6 +16,16 @@ def get_coords(locations, distances):
             xi, yi = coords[i]
             xj, yj = coords[j]
             res.append(np.sqrt((xi - xj)**2 + (yi - yj)**2) - d)
+
+        for (a, b), vec in direction_constraints.items():
+            i, j = loc_index[a], loc_index[b]
+            xi, yi = coords[i]
+            xj, yj = coords[j]
+            dx, dy = xj - xi, yj - yi
+            norm = np.sqrt(dx*dx + dy*dy) + 1e-6
+            dot = (dx/norm)*vec[0] + (dy/norm)*vec[1]
+            res.append(0.5 * (1 - dot))
+
         # Repulsion residuals (soft constraint)
         for i in range(len(coords)):
             for j in range(i+1, len(coords)):
@@ -55,14 +65,20 @@ def get_coords(locations, distances):
 def check_conflicts(distances):
     kept = {}
     conflicts = {}
-    for (a, b), d in distances.items():
-        key = tuple(sorted((a, b)))  # symmetric pair
+    for pair, dist_list in distances.items():
+        key = tuple(sorted(pair))
         if key not in kept:
-            kept[key] = d
+            kept[key] = dist_list[0]
+            if len(dist_list) > 1:
+                # additional entries beyond the first are potential conflicts
+                for v in dist_list[1:]:
+                    if not np.isclose(v, kept[key], rtol=1e-5, atol=1e-5):
+                        conflicts[key] = [kept[key], v]
         else:
-            if not np.isclose(kept[key], d, rtol=1e-5, atol=1e-5):
-                # print(f"⚠️ Conflict detected between {a} and {b}: "
-                #       f"{kept[key]} vs {d}")
-                conflicts[key] = [kept[key], d]
+            for v in dist_list:
+                if not np.isclose(v, kept[key], rtol=1e-5, atol=1e-5):
+                    # print(f"⚠️ Conflict detected between {a} and {b}: "
+                        #       f"{kept[key]} vs {d}")
+                    conflicts.setdefault(key, [kept[key]]).append(v)
     return kept, conflicts
 
