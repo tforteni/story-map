@@ -1,5 +1,5 @@
 import sys
-from src import extractor, solver, visualizer
+from src import extractor, solver, visualizer, config
 
 # usage: python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
 def main():
@@ -17,12 +17,12 @@ def main():
 
     locations = extractor.get_all_locations(travel_info) #don't worry about this for now
     all_distances = extractor.get_distances(travel_info)
-    direction_constraints = extractor.get_direction_constraints(travel_info)
+    (direction_constraints, direction_conflicts) = extractor.get_direction_constraints(travel_info)
 
     (distances, conflicts) = solver.check_conflicts(all_distances)
 
-    coords = solver.get_coords(locations,distances, direction_constraints)
-    visualizer. plot_map(coords, distances, conflicts, with_routes)
+    (coords, distances) = solver.get_coords(locations, distances, direction_constraints)
+    visualizer. plot_map(coords, distances, conflicts, direction_conflicts, with_routes)
 
 
 if __name__=="__main__":
