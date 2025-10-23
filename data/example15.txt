@@ -1,0 +1,2 @@
+After that they went to Callahan which is north of Mizani. 
+Testing direction (positional rule) with sentence beginning with a preposition - so the sentence tree is different.
