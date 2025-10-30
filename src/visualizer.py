@@ -1,4 +1,8 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import tempfile
+import os
 
 def plot_map(coords, distances, conflicts, direction_conflicts, with_routes):
     plt.figure(figsize=(8, 6))
@@ -32,4 +36,10 @@ def plot_map(coords, distances, conflicts, direction_conflicts, with_routes):
     plt.xlabel("X coordinate")
     plt.ylabel("Y coordinate")
     plt.axis("equal")
-    plt.show()
+    # plt.show()
+
+    temp_dir = tempfile.gettempdir()
+    file_path = os.path.join(temp_dir, "map.png")
+    plt.savefig(file_path, format='png', bbox_inches='tight')
+    plt.close()  # free memory
+    return file_path
