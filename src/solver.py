@@ -6,6 +6,12 @@ from scipy.optimize import least_squares
 def get_coords(locations, distances, direction_constraints):
     # Map location names to indices
     loc_index = {loc: i for i, loc in enumerate(locations)}
+    distance_lookup = {}
+    for (l1, l2), dist_entry in distances.items():
+        d = dist_entry[0]
+        distance_lookup[(l1, l2)] = d
+        distance_lookup[(l2, l1)] = d
+    avg_distance = np.mean(list(distance_lookup.values())) if distance_lookup else 1.0
 
     def residuals(coords):
         coords = coords.reshape(-1, 2)
@@ -25,8 +31,9 @@ def get_coords(locations, distances, direction_constraints):
             xj, yj = coords[j]
             dx, dy = xj - xi, yj - yi
             norm = np.sqrt(dx*dx + dy*dy) + 1e-6
-            dot = (dx/norm)*vec[0] + (dy/norm)*vec[1]
-            res.append(0.5 * (1 - dot))
+            weight = distance_lookup.get((a, b), avg_distance)
+            res.append(weight * ((dx / norm) - vec[0]))
+            res.append(weight * ((dy / norm) - vec[1]))
 
         # Repulsion residuals (soft constraint)
         MIN_DIST = 15.0  # tweak depending on map scale
@@ -35,9 +42,8 @@ def get_coords(locations, distances, direction_constraints):
                 dx = coords[i, 0] - coords[j, 0]
                 dy = coords[i, 1] - coords[j, 1]
                 dist = np.sqrt(dx * dx + dy * dy) + 1e-6
-                if dist < MIN_DIST:
-                    # Penalize overlap more strongly the closer they get
-                    res.append((MIN_DIST - dist) / MIN_DIST)
+                # Penalize overlap more strongly the closer they get while keeping residual length constant
+                res.append(max(0.0, (MIN_DIST - dist) / MIN_DIST))
 
         # This section encourages the points to not be in a straight line but it doesn't always work
         if len(coords) >= 3:
@@ -143,4 +149,3 @@ def check_conflicts(distances):
                 conflicts.setdefault(key, [(base_distance, base_entry)]).append((d, entry))
 
     return kept, conflicts
-

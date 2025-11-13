@@ -105,7 +105,8 @@ def get_distances(travel_info):
         if segments > 0:
             segment_distance = total_distance / segments
             for i in range(segments):
-                pair = tuple(sorted((locs[i], locs[i + 1])))
+                pair = (locs[i], locs[i + 1])
+
 
                 if pair not in distances:
                     # No prior record → just add
@@ -128,10 +129,11 @@ def get_distances(travel_info):
                     # no action needed here
 
         # --- Add fallback for direction-only sentences ---
-        for (a, b, _) in info.get('directions', []):
-            pair = tuple(sorted((a, b)))
-            if pair not in distances:
-                distances[pair] = [(default_distance(), entry, "default")]
+        if not info.get("date"):
+            for (a, b, _) in info.get("directions", []):
+                pair = (a, b)
+                if pair not in distances:
+                    distances[pair] = [(default_distance(), entry, "default")]
 
     print(distances)
     return distances
@@ -146,7 +148,8 @@ def get_all_travel_info(paragraph: str):
       - conflicting directions ("A is north of B. A is south of B.")
     """
     # from src import config
-    # config.all_entries = {} # clear past sentences, #i probably do want to remember past sentences i think. it correctly recognises conflicts when i do remember past sentences even if the info comes in two seperate requests! yay!!!! What I need now is to distinguish between the original sentence being changed (which should lead to the map being edited) and a new conflicting sentence being introduced (which currently correctly leads to a conflict being rendered)
+    #for now i am going to clear all entries
+    config.all_entries = {} # clear past sentences, #i probably do want to remember past sentences i think. it correctly recognises conflicts when i do remember past sentences even if the info comes in two seperate requests! yay!!!! What I need now is to distinguish between the original sentence being changed (which should lead to the map being edited) and a new conflicting sentence being introduced (which currently correctly leads to a conflict being rendered)
     # Entry.sentence_count = 1
 
     nlp = spacy.load("en_core_web_sm")

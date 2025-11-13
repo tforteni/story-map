@@ -1,1 +1,2 @@
-The party travelled north from Erendale to Camelot in 30 days on foot. They then travelled east from Camelot to Lok in 2 weeks.
+They went from Callahan to Rivenfell in two weeks. They went from Callahan to Rivenfell. They went from Callahan to Rivenfell in two days.
+Checking that a default in the middle still lets a conflict be flagged

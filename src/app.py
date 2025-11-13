@@ -8,7 +8,7 @@ def generate_map_endpoint():
     data = request.get_json()
     doc_text = data['content']
 
-    map_file_path = generate_map(doc_text)
+    map_file_path = generate_map(doc_text,1)
     return send_file(map_file_path, mimetype='image/png')
 
 if __name__ == '__main__':
@@ -19,3 +19,6 @@ if __name__ == '__main__':
     #  -H "Content-Type: application/json" \
     #  -d '{"content": "They went from Lok to Erendale in one day."}' \ 
     #  --output map.png
+
+#python -m src.app
+#ngrok http 8080
