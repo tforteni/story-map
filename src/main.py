@@ -1,5 +1,5 @@
 import sys
-from src import extractor, solver, visualizer, config
+from src import extractor, solver, visualizer, config, terrain_renderer
 
 # usage: python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
 def main():
@@ -23,6 +23,7 @@ def main():
 
     (coords, distances) = solver.get_coords(locations, distances, direction_constraints)
     visualizer. plot_map(coords, distances, conflicts, direction_conflicts, with_routes)
+    terrain_renderer.draw_terrain(coords)
 
 
 if __name__=="__main__":
