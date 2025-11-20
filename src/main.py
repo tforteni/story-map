@@ -24,6 +24,8 @@ def main():
     (coords, distances) = solver.get_coords(locations, distances, direction_constraints)
     visualizer. plot_map(coords, distances, conflicts, direction_conflicts, with_routes)
     terrain_renderer.draw_terrain(coords)
+    # for conflict in conflicts:
+    #     print(conflict)
 
 
 if __name__=="__main__":

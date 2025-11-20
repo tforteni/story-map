@@ -1,5 +1,5 @@
 import matplotlib
-# matplotlib.use("Agg")  # non-interactive backend
+matplotlib.use("Agg")  # for ngrok
 import matplotlib.pyplot as plt
 import numpy as np
 import tempfile
@@ -30,7 +30,7 @@ def normalized(coords, width, height, pad=40):
         for name, (x, y) in coords.items()
     }
 
-def draw_terrain(coords):
+def draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes):
     if not coords:
         return
     w, h = 800, 600
@@ -63,12 +63,29 @@ def draw_terrain(coords):
     ax.imshow(terrain, cmap=world_cmap, origin="lower")
     for name, (x, y) in norm_coords.items():
         ax.text(x, y, name, ha="center", va="center", color="black")
+
+    if with_routes:
+        for (a, b), d in distances.items():
+            d = d[0]
+            xa, ya = norm_coords[a]
+            xb, yb = norm_coords[b]
+            plt.plot([xa, xb], [ya, yb], "k--", alpha=0.6)  # dashed line
+            midx, midy = (xa+xb)/2, (ya+yb)/2
+            plt.text(midx, midy, f"{d:.1f}", fontsize=8, color="gray")
+
+            key = tuple(sorted((a, b)))
+            if key in conflicts : #I will eventually want to pass more information so that the user can hover over the warning and see what exactly is wrong
+                plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="orange")
+            if key in direction_conflicts:
+                plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="red")
+                         
     ax.axis("off")
 
-    plt.show()
+    # plt.show() #uncomment this for local dev
 
-    # tmp_dir = tempfile.gettempdir()
-    # file_path = os.path.join(tmp_dir, "terrain_map.png")
-    # fig.savefig(file_path, dpi=300, bbox_inches="tight")
-    # plt.close(fig)
-    # return file_path
+    # uncomment for ngrok
+    tmp_dir = tempfile.gettempdir()
+    file_path = os.path.join(tmp_dir, "terrain_map.png")
+    fig.savefig(file_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return file_path

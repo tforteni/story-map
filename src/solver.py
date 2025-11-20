@@ -149,3 +149,33 @@ def check_conflicts(distances):
                 conflicts.setdefault(key, [(base_distance, base_entry)]).append((d, entry))
 
     return kept, conflicts
+
+def extract_conflict_sentence_pairs(conflicts):
+    grouped = []
+
+    for entries in conflicts.values():
+        sentences = []
+
+        for entry in entries:
+            # Support both legacy (distance, sentences) and the new
+            # (distance, sentences, tag) tuple format.
+            if len(entry) == 3:
+                _, sentence_list, _ = entry
+            else:
+                _, sentence_list = entry
+
+            if not sentence_list:
+                continue
+
+            raw = str(sentence_list[0]).strip()
+            clean = raw.split(": ", 1)[1] if ": " in raw else raw
+            sentences.append(clean)
+
+        if len(sentences) < 2:
+            continue
+
+        base = sentences[0]
+        for other in sentences[1:]:
+            grouped.append((base, other))
+
+    return grouped

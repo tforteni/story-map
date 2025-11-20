@@ -1,2 +1,2 @@
-The group travelled from Callahan to Rivenfell on foot in 30 days. They also went from Callahan to Rivenfell in one day.
+The group travelled from Callahan to Rivenfell on foot in 30 days. They also went from Callahan to Rivenfell in one day. The group travelled from Lok to Mizani on foot in 30 days. They also went from Lok to Mizani in one day.
 Testing distance conflict.

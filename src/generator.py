@@ -1,4 +1,4 @@
-from src import extractor, solver, visualizer, config #maybe i can delete config
+from src import extractor, solver, visualizer, config, terrain_renderer #maybe i can delete config and visualizer
 
 def generate_map(text, with_routes=1):
     travel_info = extractor.get_all_travel_info(text)
@@ -12,6 +12,10 @@ def generate_map(text, with_routes=1):
     (distances, conflicts) = solver.check_conflicts(all_distances)
 
     (coords, distances) = solver.get_coords(locations, distances, direction_constraints)
-    map_file_path = visualizer.plot_map(coords, distances, conflicts, direction_conflicts, with_routes)
+    # map_file_path = visualizer.plot_map(coords, distances, conflicts, direction_conflicts, with_routes)
+    map_file_path = terrain_renderer.draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
 
-    return map_file_path
+    conflicts = solver.extract_conflict_sentence_pairs(conflicts)
+    # print(conflicts)
+
+    return map_file_path, conflicts

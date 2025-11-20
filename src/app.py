@@ -1,4 +1,5 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
+import base64
 from src.generator import generate_map
 
 app = Flask(__name__)
@@ -8,8 +9,16 @@ def generate_map_endpoint():
     data = request.get_json()
     doc_text = data['content']
 
-    map_file_path = generate_map(doc_text,1)
-    return send_file(map_file_path, mimetype='image/png')
+    map_file_path, conflicts = generate_map(doc_text,1)
+    with open(map_file_path, "rb") as f:
+        img_bytes = f.read()
+    img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+
+    # return send_file(map_file_path, mimetype='image/png')
+    return jsonify({
+        "map_png_base64": img_b64,
+        "conflicts": conflicts
+    })
 
 if __name__ == '__main__':
     app.run(port=8080)

@@ -37,7 +37,7 @@ def plot_map(coords, distances, conflicts, direction_conflicts, with_routes):
     plt.xlabel("X coordinate")
     plt.ylabel("Y coordinate")
     plt.axis("equal")
-    # plt.show() #uncomment this for locally
+    # plt.show() #uncomment this for local dev
 
     # temp_dir = tempfile.gettempdir() #uncomment this block for ngrok
     # file_path = os.path.join(temp_dir, "map.png")
