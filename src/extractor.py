@@ -105,8 +105,8 @@ def get_distances(travel_info):
         if segments > 0:
             segment_distance = total_distance / segments
             for i in range(segments):
-                pair = (locs[i], locs[i + 1])
-
+                pair = tuple(sorted((locs[i], locs[i + 1]))) 
+                #pair = (locs[i], locs[i + 1]) #I don't foresee any problems w sorting but can always revert to this and change terrain_rendered to use key = (a,b) and rev_key = (b,a)
 
                 if pair not in distances:
                     # No prior record → just add
@@ -250,24 +250,53 @@ DIRECTION_WORDS = {
 }
 
 def get_direction_constraints(all_info):
-    constraints = {}
+    constraints = defaultdict(list)
     conflicts = defaultdict(list)
+
     for info in all_info:
         entry = info["entry"]
-        for (a, b, dir_name) in info.get("directions", []):
-            key = (a, b)
-            direction = DIRECTION_WORDS[dir_name]
 
-            if key in constraints and constraints[key] != direction:
-                existing_direction, existing_entry = constraints[key]
-                conflicts.setdefault(key, [(existing_direction, existing_entry)]).append((direction, entry))
-                continue
-                # conflicts[key].append((direction, entry))
-                # conflicts.setdefault(key, constraints[key]).append((direction, entry))
-                # conflicts.setdefault(key, [(base_distance, base_entry)]).append((d, entry))
-                # break
-            constraints[key] = (direction, entry)
+        for (a, b, dir_name) in info.get("directions", []):
+            s_key = tuple(sorted((a, b)))
+            vec = DIRECTION_WORDS[dir_name]
+
+            if (a, b) != s_key:
+                vec = (-vec[0], -vec[1])  # flip direction to match s_key
+
+            is_conflict = False
+            for existing_vec, existing_entry in constraints[s_key]:
+                x_conflict = existing_vec[0] != 0 and vec[0] != 0 and np.sign(existing_vec[0]) != np.sign(vec[0])
+                y_conflict = existing_vec[1] != 0 and vec[1] != 0 and np.sign(existing_vec[1]) != np.sign(vec[1])
+
+                if x_conflict or y_conflict:
+                    conflicts.setdefault(s_key, [(existing_vec, existing_entry)]).append((vec, entry))
+                    is_conflict = True
+                    break
+
+            if not is_conflict:
+                constraints[s_key].append((vec, entry))
+
     return constraints, conflicts
+
+# def get_direction_constraints(all_info):
+#     constraints = {}
+#     conflicts = defaultdict(list)
+#     for info in all_info:
+#         entry = info["entry"]
+#         for (a, b, dir_name) in info.get("directions", []):
+#             key = (a, b)
+#             direction = DIRECTION_WORDS[dir_name]
+
+#             if key in constraints and constraints[key] != direction:
+#                 existing_direction, existing_entry = constraints[key]
+#                 conflicts.setdefault(key, [(existing_direction, existing_entry)]).append((direction, entry))
+#                 continue
+#                 # conflicts[key].append((direction, entry))
+#                 # conflicts.setdefault(key, constraints[key]).append((direction, entry))
+#                 # conflicts.setdefault(key, [(base_distance, base_entry)]).append((d, entry))
+#                 # break
+#             constraints[key] = (direction, entry)
+#     return constraints, conflicts
 
 INVERSE_DIRECTION = {
     "north": "south",

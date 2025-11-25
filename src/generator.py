@@ -8,6 +8,8 @@ def generate_map(text, with_routes=1):
     locations = extractor.get_all_locations(travel_info) #don't worry about this for now
     all_distances = extractor.get_distances(travel_info)
     (direction_constraints, direction_conflicts) = extractor.get_direction_constraints(travel_info)
+    print(direction_constraints)
+    print(direction_conflicts)
 
     (distances, conflicts) = solver.check_conflicts(all_distances)
 
@@ -15,7 +17,6 @@ def generate_map(text, with_routes=1):
     # map_file_path = visualizer.plot_map(coords, distances, conflicts, direction_conflicts, with_routes)
     map_file_path = terrain_renderer.draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
 
-    conflicts = solver.extract_conflict_sentence_pairs(conflicts)
-    # print(conflicts)
+    all_conflicts = solver.remove_exact_duplicate_pairs(solver.extract_all_conflict_sentence_pairs(conflicts, direction_conflicts))
 
-    return map_file_path, conflicts
+    return map_file_path, all_conflicts

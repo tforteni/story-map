@@ -24,16 +24,20 @@ def get_coords(locations, distances, direction_constraints):
             xj, yj = coords[j]
             res.append(np.sqrt((xi - xj)**2 + (yi - yj)**2) - d)
 
-        for (a, b), vec in direction_constraints.items():
-            vec = vec[0]
+        for (a, b), vec_list in direction_constraints.items():
             i, j = loc_index[a], loc_index[b]
             xi, yi = coords[i]
             xj, yj = coords[j]
             dx, dy = xj - xi, yj - yi
             norm = np.sqrt(dx*dx + dy*dy) + 1e-6
             weight = distance_lookup.get((a, b), avg_distance)
-            res.append(weight * ((dx / norm) - vec[0]))
-            res.append(weight * ((dy / norm) - vec[1]))
+
+            for vec, _ in vec_list:  # iterate over all valid vectors
+                # axis_weight = 1.0 if abs(vec[0]) == 1 or abs(vec[1]) == 1 else 0.5
+                # res.append(weight * axis_weight * ((dx / norm) - vec[0]))
+                # res.append(weight * axis_weight * ((dy / norm) - vec[1]))
+                res.append(weight * ((dx / norm) - vec[0]))
+                res.append(weight * ((dy / norm) - vec[1]))
 
         # Repulsion residuals (soft constraint)
         MIN_DIST = 15.0  # tweak depending on map scale
@@ -58,11 +62,11 @@ def get_coords(locations, distances, direction_constraints):
                 ratio = max(var_x, var_y) / (min(var_x, var_y) + 1e-6)
                 res.append(0.01 * ratio)
 
-        if len(direction_constraints) > 1:
-            dirs = np.array([v[0] for v in direction_constraints.values()])
+        dirs = np.array([vec for vec_list in direction_constraints.values() for vec, _ in vec_list])
+        if len(dirs) > 1:
             mean_dir = np.mean(dirs, axis=0)
             spread = np.mean(np.linalg.norm(dirs - mean_dir, axis=1))
-            res.append(0.01 / (spread + 1e-3)) 
+            res.append(0.01 / (spread + 1e-3))
 
         return res
 
@@ -150,32 +154,110 @@ def check_conflicts(distances):
 
     return kept, conflicts
 
-def extract_conflict_sentence_pairs(conflicts):
-    grouped = []
+# def extract_conflict_sentence_pairs(conflicts):
+#     grouped = []
 
-    for entries in conflicts.values():
-        sentences = []
+#     for entries in conflicts.values():
+#         sentences = []
 
-        for entry in entries:
-            # Support both legacy (distance, sentences) and the new
-            # (distance, sentences, tag) tuple format.
-            if len(entry) == 3:
-                _, sentence_list, _ = entry
-            else:
-                _, sentence_list = entry
+#         for entry in entries:
+#             # Support both legacy (distance, sentences) and the new
+#             # (distance, sentences, tag) tuple format.
+#             if len(entry) == 3:
+#                 _, sentence_list, _ = entry
+#             else:
+#                 _, sentence_list = entry
 
-            if not sentence_list:
+#             if not sentence_list:
+#                 continue
+
+#             raw = str(sentence_list[0]).strip()
+#             clean = raw.split(": ", 1)[1] if ": " in raw else raw
+#             sentences.append(clean)
+
+#         if len(sentences) < 2:
+#             continue
+
+#         base = sentences[0]
+#         for other in sentences[1:]:
+#             grouped.append((base, other))
+
+#     return grouped
+
+# def extract_direction_conflict_sentence_pairs(direction_conflicts):
+#     grouped = []
+
+#     for entries in direction_conflicts.values():
+#         sentences = []
+
+#         for vec, entry_list in entries:
+#             if not entry_list:
+#                 continue
+
+#             # entry_list is a list of sentences, usually one
+#             raw = str(entry_list[0]).strip()
+#             # Remove the "Sentence N: " prefix if present
+#             clean = raw.split(": ", 1)[1] if ": " in raw else raw
+#             sentences.append(clean)
+
+#         if len(sentences) < 2:
+#             continue
+
+#         base = sentences[0]
+#         for other in sentences[1:]:
+#             grouped.append((base, other))
+
+#     return grouped
+
+def extract_all_conflict_sentence_pairs(distance_conflicts, direction_conflicts):
+    """
+    Extracts sentence pairs for both distance and direction conflicts.
+    
+    Args:
+        distance_conflicts: dict from check_conflicts() 
+        direction_conflicts: dict from get_direction_constraints()
+    
+    Returns:
+        List of tuples: (sentence1, sentence2)
+    """
+    def extract_pairs(conflicts):
+        grouped = []
+        for entries in conflicts.values():
+            sentences = []
+
+            for entry in entries:
+                # Handle both distance and direction entry formats
+                if len(entry) == 3:
+                    _, entry_list, _ = entry
+                else:
+                    _, entry_list = entry
+
+                if not entry_list:
+                    continue
+
+                # entry_list is usually a list with one sentence
+                raw = str(entry_list[0]).strip()
+                clean = raw.split(": ", 1)[1] if ": " in raw else raw
+                sentences.append(clean)
+
+            if len(sentences) < 2:
                 continue
 
-            raw = str(sentence_list[0]).strip()
-            clean = raw.split(": ", 1)[1] if ": " in raw else raw
-            sentences.append(clean)
+            base = sentences[0]
+            for other in sentences[1:]:
+                grouped.append((base, other))
+        return grouped
 
-        if len(sentences) < 2:
-            continue
+    distance_pairs = extract_pairs(distance_conflicts)
+    direction_pairs = extract_pairs(direction_conflicts)
 
-        base = sentences[0]
-        for other in sentences[1:]:
-            grouped.append((base, other))
+    return distance_pairs + direction_pairs
 
-    return grouped
+def remove_exact_duplicate_pairs(pairs):
+    seen = set()
+    unique = []
+    for a, b in pairs:
+        if (a, b) not in seen:
+            unique.append((a, b))
+            seen.add((a, b))
+    return unique

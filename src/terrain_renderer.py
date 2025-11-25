@@ -73,10 +73,11 @@ def draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
             midx, midy = (xa+xb)/2, (ya+yb)/2
             plt.text(midx, midy, f"{d:.1f}", fontsize=8, color="gray")
 
-            key = tuple(sorted((a, b)))
-            if key in conflicts : #I will eventually want to pass more information so that the user can hover over the warning and see what exactly is wrong
-                plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="orange")
-            if key in direction_conflicts:
+            s_key = tuple(sorted((a, b)))
+            # if s_key in conflicts: #I will eventually want to pass more information so that the user can hover over the warning and see what exactly is wrong
+            #     plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="orange")
+            #For now I will just have one warning on the map regardless of direction or distance conflict
+            if s_key in conflicts or s_key in direction_conflicts:
                 plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="red")
                          
     ax.axis("off")
