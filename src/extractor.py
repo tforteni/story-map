@@ -150,7 +150,7 @@ def get_all_travel_info(paragraph: str):
     # from src import config
     #for now i am going to clear all entries
     config.all_entries = {} # clear past sentences, #i probably do want to remember past sentences i think. it correctly recognises conflicts when i do remember past sentences even if the info comes in two seperate requests! yay!!!! What I need now is to distinguish between the original sentence being changed (which should lead to the map being edited) and a new conflicting sentence being introduced (which currently correctly leads to a conflict being rendered)
-    # Entry.sentence_count = 1
+    Entry.sentence_count = 1
 
     nlp = spacy.load("en_core_web_sm")
     ner = pipeline(
