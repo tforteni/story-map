@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family:Arial,sans-serif; margin:10px;">
+    <div id="map-container">⏳ Generating map...</div>
+    <div id="conflicts-container" style="margin-top:20px;">
+      <p>Scanning for conflicts...</p>
+    </div>
+    <script>
+      google.script.run.withSuccessHandler(result => {
+        document.getElementById('map-container').innerHTML = `
+          <img src="${result.dataUrl}" width="100%" alt="Story Map">
+          <p style="font-size:12px; color:gray;">
+            File: <b>${result.fileName}</b><br>
+            <a href="${result.folderUrl}" target="_blank">Open Story Maps Folder</a>
+          </p>`;
+        const conflictsList = document.getElementById('conflicts-container');
+        conflictsList.innerHTML = '<p>Conflicts:</p>';
+        if (result.conflicts && result.conflicts.length > 0) {
+          result.conflicts.forEach(conflictPair => {
+            const p = document.createElement('p');
+            p.style.color = 'red';
+            p.style.fontSize = '10px';
+            p.textContent = conflictPair.join(' vs ');
+            conflictsList.appendChild(p);
+          });
+        } else {
+          conflictsList.innerHTML = '<p>No conflicts detected</p>';
+        }
+      }).generateMap();
+    </script>
+  </body>
+</html>

@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.optimize import least_squares
 
-#GET COORDINATES
-
 def get_coords(locations, distances, direction_constraints):
     # Map location names to indices
     loc_index = {loc: i for i, loc in enumerate(locations)}
@@ -33,14 +31,11 @@ def get_coords(locations, distances, direction_constraints):
             weight = distance_lookup.get((a, b), avg_distance)
 
             for vec, _ in vec_list:  # iterate over all valid vectors
-                # axis_weight = 1.0 if abs(vec[0]) == 1 or abs(vec[1]) == 1 else 0.5
-                # res.append(weight * axis_weight * ((dx / norm) - vec[0]))
-                # res.append(weight * axis_weight * ((dy / norm) - vec[1]))
                 res.append(weight * ((dx / norm) - vec[0]))
                 res.append(weight * ((dy / norm) - vec[1]))
 
         # Repulsion residuals (soft constraint)
-        MIN_DIST = 15.0  # tweak depending on map scale
+        MIN_DIST = 15.0  # change depending on map scale
         for i in range(len(coords)):
             for j in range(i + 1, len(coords)):
                 dx = coords[i, 0] - coords[j, 0]
@@ -49,9 +44,8 @@ def get_coords(locations, distances, direction_constraints):
                 # Penalize overlap more strongly the closer they get while keeping residual length constant
                 res.append(max(0.0, (MIN_DIST - dist) / MIN_DIST))
 
-        # This section encourages the points to not be in a straight line but it doesn't always work
+        # This section encourages the points to not be in a straight line
         if len(coords) >= 3:
-            # Compute principal axis variance ratio (x/y spread)
             xs = coords[:, 0]
             ys = coords[:, 1]
             var_x = np.var(xs)
@@ -76,19 +70,16 @@ def get_coords(locations, distances, direction_constraints):
 
     if len(locations) > 1:
         d = distances.get((locations[0], locations[1]),
-                      distances.get((locations[1], locations[0]), (1.0, None))) #Idk what this (1.0, None) does...
+                      distances.get((locations[1], locations[0]), (1.0, None)))
         d = d[0]
         theta = np.random.rand() * 2 * np.pi
         x0[2], x0[3] = d * np.cos(theta), d * np.sin(theta)
 
-
-    # Solve
     result = least_squares(residuals, x0)
 
     coords_array = result.x.reshape(-1, 2)
     coords = {name: tuple(coord) for name, coord in zip(locations, coords_array)}
 
-    # Udate distances with modelled values
     updated_distances = {}
 
     for (l1, l2), (orig_d, entry) in distances.items():
@@ -97,31 +88,9 @@ def get_coords(locations, distances, direction_constraints):
             modelled_d = np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
             updated_distances[(l1, l2)] = (modelled_d, entry)
         else:
-            # Keep original distance if one point is missing - check if this is the right thing to do
             updated_distances[(l1, l2)] = (orig_d, entry)
 
     return coords, updated_distances
-
-# def check_conflicts(distances):
-#     kept = {}
-#     conflicts = {}
-#     for pair, dist_list in distances.items():
-#         key = tuple(sorted(pair))
-#         base_distance, base_entry = dist_list[0]
-#         if key not in kept:
-#             # kept[key] = dist_list[0]
-#             kept[key] = (base_distance, base_entry)
-#             if len(dist_list) > 1:
-#                 # additional entries beyond the first are potential conflicts
-#                 for (d, entry) in dist_list[1:]:
-#                     if not np.isclose(d, base_distance, rtol=1e-5, atol=1e-5):
-#                         conflicts.setdefault(key, [(base_distance, base_entry)]).append((d, entry))
-#                         # conflicts[key] = [kept[key], v]
-#         else:
-#             for (d, entry) in dist_list:
-#                 if not np.isclose(d, base_distance, rtol=1e-5, atol=1e-5):
-#                     conflicts.setdefault(key, [(base_distance, base_entry)]).append(d, entry)
-#     return kept, conflicts
 
 def check_conflicts(distances):
     kept = {}
@@ -131,7 +100,7 @@ def check_conflicts(distances):
         key = tuple(sorted(pair))
         first = dist_list[0]
 
-        # Support both 2-tuple and 3-tuple forms
+        # Supports both 2-tuple and 3-tuple forms
         if len(first) == 3:
             base_distance, base_entry, base_type = first
         else:
@@ -154,61 +123,6 @@ def check_conflicts(distances):
 
     return kept, conflicts
 
-# def extract_conflict_sentence_pairs(conflicts):
-#     grouped = []
-
-#     for entries in conflicts.values():
-#         sentences = []
-
-#         for entry in entries:
-#             # Support both legacy (distance, sentences) and the new
-#             # (distance, sentences, tag) tuple format.
-#             if len(entry) == 3:
-#                 _, sentence_list, _ = entry
-#             else:
-#                 _, sentence_list = entry
-
-#             if not sentence_list:
-#                 continue
-
-#             raw = str(sentence_list[0]).strip()
-#             clean = raw.split(": ", 1)[1] if ": " in raw else raw
-#             sentences.append(clean)
-
-#         if len(sentences) < 2:
-#             continue
-
-#         base = sentences[0]
-#         for other in sentences[1:]:
-#             grouped.append((base, other))
-
-#     return grouped
-
-# def extract_direction_conflict_sentence_pairs(direction_conflicts):
-#     grouped = []
-
-#     for entries in direction_conflicts.values():
-#         sentences = []
-
-#         for vec, entry_list in entries:
-#             if not entry_list:
-#                 continue
-
-#             # entry_list is a list of sentences, usually one
-#             raw = str(entry_list[0]).strip()
-#             # Remove the "Sentence N: " prefix if present
-#             clean = raw.split(": ", 1)[1] if ": " in raw else raw
-#             sentences.append(clean)
-
-#         if len(sentences) < 2:
-#             continue
-
-#         base = sentences[0]
-#         for other in sentences[1:]:
-#             grouped.append((base, other))
-
-#     return grouped
-
 def extract_all_conflict_sentence_pairs(distance_conflicts, direction_conflicts):
     """
     Extracts sentence pairs for both distance and direction conflicts.
@@ -226,7 +140,6 @@ def extract_all_conflict_sentence_pairs(distance_conflicts, direction_conflicts)
             sentences = []
 
             for entry in entries:
-                # Handle both distance and direction entry formats
                 if len(entry) == 3:
                     _, entry_list, _ = entry
                 else:
@@ -235,7 +148,6 @@ def extract_all_conflict_sentence_pairs(distance_conflicts, direction_conflicts)
                 if not entry_list:
                     continue
 
-                # entry_list is usually a list with one sentence
                 raw = str(entry_list[0]).strip()
                 clean = raw.split(": ", 1)[1] if ": " in raw else raw
                 sentences.append(clean)

@@ -66,26 +66,6 @@ def get_all_locations(travel_info):
             locs.add(b)
     return sorted(locs)
 
-#This works for conflicts but has the problem w creating a conflict for an unspecified distance
-# def get_distances(travel_info):
-#     distances = {}
-#     for info in travel_info:
-#         entry = info["entry"]
-#         locs = info['locations']
-#         date_text = info['date'][0] if info['date'] else f"{DEFAULT_DAYS} days"
-#         total_distance = days_to_distance(days(date_text), walking_pace)
-#         segments = len(locs) - 1
-#         if segments > 0:
-#             segment_distance = total_distance / segments
-#             for i in range(segments):
-#                 pair = (locs[i], locs[i+1])
-#                 distances.setdefault(pair, []).append((segment_distance, entry))
-
-#     for (a, b, _) in info.get('directions', []):
-#             if (a, b) not in distances and (b, a) not in distances:
-#                 distances.setdefault((a, b), []).append((default_distance(), entry))
-#     return distances
-
 def get_distances(travel_info):
     distances = {}
 
@@ -93,7 +73,7 @@ def get_distances(travel_info):
         entry = info["entry"]
         locs = info['locations']
 
-        # --- Compute real distance if date present ---
+        # Compute real distance if date present
         is_real = bool(info['date'])
         if is_real:
             date_text = info['date'][0]
@@ -106,36 +86,26 @@ def get_distances(travel_info):
             segment_distance = total_distance / segments
             for i in range(segments):
                 pair = tuple(sorted((locs[i], locs[i + 1]))) 
-                #pair = (locs[i], locs[i + 1]) #I don't foresee any problems w sorting but can always revert to this and change terrain_rendered to use key = (a,b) and rev_key = (b,a)
-
+                
                 if pair not in distances:
-                    # No prior record → just add
                     distances[pair] = [(segment_distance, entry, "real" if is_real else "default")]
 
                 else:
-                    # Prior record exists
                     prev_d, prev_entry, prev_type = distances[pair][0]
 
-                    # If old is default and new is real → replace it
                     if prev_type == "default" and is_real:
                         distances[pair] = [(segment_distance, entry, "real")]
 
-                    # If both are real → record both (potential conflict)
                     elif prev_type == "real" and is_real:
                         distances[pair].append((segment_distance, entry, "real"))
 
-                    # If both are default → keep first one
-                    # else do nothing (real always dominates)
-                    # no action needed here
-
-        # --- Add fallback for direction-only sentences ---
+        # Fallback for direction-only sentences
         if not info.get("date"):
             for (a, b, _) in info.get("directions", []):
                 pair = (a, b)
                 if pair not in distances:
                     distances[pair] = [(default_distance(), entry, "default")]
 
-    print(distances)
     return distances
 
 def get_all_travel_info(paragraph: str):
@@ -148,7 +118,7 @@ def get_all_travel_info(paragraph: str):
       - conflicting directions ("A is north of B. A is south of B.")
     """
 
-    config.all_entries = {} # clear past sentences, #i probably do want to remember past sentences i think. it correctly recognises conflicts when i do remember past sentences even if the info comes in two seperate requests! yay!!!! What I need now is to distinguish between the original sentence being changed (which should lead to the map being edited) and a new conflicting sentence being introduced (which currently correctly leads to a conflict being rendered)
+    config.all_entries = {} # clear past sentences
     Entry.sentence_count = 1
 
     nlp = spacy.load("en_core_web_sm")
@@ -165,7 +135,6 @@ def get_all_travel_info(paragraph: str):
         entry = Entry(sent.text)
         config.all_entries[id] = entry
         entry.sent_info = extract_travel_info(sent.text, nlp, ner)
-    # sent_infos = [extract_travel_info(sent.text, nlp, ner) for sent in doc.sents]
 
     merged = []
     current = None
@@ -175,12 +144,11 @@ def get_all_travel_info(paragraph: str):
 
     for entry in config.all_entries.values():
         info = entry.sent_info
-    # for info in sent_infos:
         has_path = bool(info.get("locations"))
         has_date = bool(info.get("date"))
         has_direction = bool(info.get("directions"))
 
-        # --- New trip begins ---
+        # New trip begins
         if has_path or has_direction:
             if current:
                 merged.append(current)
@@ -195,10 +163,8 @@ def get_all_travel_info(paragraph: str):
             current_has_date = bool(info.get("date"))
             current_has_direction = bool(info.get("directions"))
 
-        # --- Date-only follow-up ---
         elif has_date and current:
             if not current_has_date:
-                # first duration, attach it
                 current["date"].extend(info["date"])
                 current_has_date = True
                 current["entry"].append(entry),
@@ -211,7 +177,6 @@ def get_all_travel_info(paragraph: str):
                     "entry": [entry],
                 })
 
-        # --- Direction-only follow-up ---
         elif has_direction and current:
             new_dir = info["directions"]
             if not current_has_direction:
@@ -277,26 +242,6 @@ def get_direction_constraints(all_info):
 
     return constraints, conflicts
 
-# def get_direction_constraints(all_info):
-#     constraints = {}
-#     conflicts = defaultdict(list)
-#     for info in all_info:
-#         entry = info["entry"]
-#         for (a, b, dir_name) in info.get("directions", []):
-#             key = (a, b)
-#             direction = DIRECTION_WORDS[dir_name]
-
-#             if key in constraints and constraints[key] != direction:
-#                 existing_direction, existing_entry = constraints[key]
-#                 conflicts.setdefault(key, [(existing_direction, existing_entry)]).append((direction, entry))
-#                 continue
-#                 # conflicts[key].append((direction, entry))
-#                 # conflicts.setdefault(key, constraints[key]).append((direction, entry))
-#                 # conflicts.setdefault(key, [(base_distance, base_entry)]).append((d, entry))
-#                 # break
-#             constraints[key] = (direction, entry)
-#     return constraints, conflicts
-
 INVERSE_DIRECTION = {
     "north": "south",
     "south": "north",
@@ -317,17 +262,14 @@ def extract_directions(sent_doc, all_locations):
             if lemma not in rule["verbs"]:
                 continue
 
-            # --- Travel pattern ---
             if rule["type"] == "travel":
                 dir_word = None
                 origin, dest = None, None
 
-                # find direction word (like 'north', 'west')
                 for child in token.children:
                     if child.dep_ in rule["direction_modifier"] and child.text.lower() in DIRECTION_WORDS:
                         dir_word = child.text.lower()
 
-                        # search *inside* the direction word’s subtree for prepositions and locations
                         for gchild in child.subtree:
                             if gchild.dep_ == "prep" and gchild.lemma_ in ("from", "to", "toward", "into"):
                                 for pobj in gchild.children:
@@ -337,7 +279,6 @@ def extract_directions(sent_doc, all_locations):
                                         elif gchild.lemma_ in ("to", "toward", "into"):
                                             dest = pobj.text
 
-                #fallback: also look at direct verb children if needed
                 if not origin or not dest:
                     for child in token.children:
                         if child.dep_ == "prep" and child.lemma_ in ("from", "to", "toward", "into"):
@@ -351,7 +292,6 @@ def extract_directions(sent_doc, all_locations):
                 if origin and dest and dir_word:
                     directions.append((origin, dest, dir_word))
 
-            # --- Positional pattern --- 
             elif rule["type"] == "positional":
                 subj = None
                 dir_word = None
@@ -374,22 +314,6 @@ def extract_directions(sent_doc, all_locations):
                         direction = INVERSE_DIRECTION[dir_word] if rule["invert"] else dir_word
                         directions.append((obj, subj, direction))
 
-            # --- Region pattern ("to/toward the north of X") --- This is currently not working
-            # elif rule["type"] == "region":
-            #     for child in token.children:
-            #         if child.dep_ == "prep" and child.lemma_ in rule["main_prep"]:
-            #             direction_word, ref_loc = None, None
-            #             for g in child.children:
-            #                 if g.text.lower() in DIRECTION_WORDS:
-            #                     direction_word = g.text.lower()
-            #                     for gg in g.children:
-            #                         if gg.dep_ == "prep" and gg.lemma_ == rule["region_prep"]:
-            #                             for pobj in gg.children:
-            #                                 if pobj.text in all_locations:
-            #                                     ref_loc = pobj.text
-            #             if direction_word and ref_loc:
-            #                 synthetic = f"{direction_word}_of_{ref_loc}"
-            #                 directions.append((ref_loc, synthetic, direction_word))
     return directions
 
 def extract_travel_info(text, nlp, ner) -> dict:
@@ -397,7 +321,6 @@ def extract_travel_info(text, nlp, ner) -> dict:
 
     entities = ner(text)
 
-    # info["locations"] = [ent["word"] for ent in entities if ent.get("entity_group") == "LOC"]
     all_locations = [ent["word"] for ent in entities if ent.get("entity_group") == "LOC"]
 
     sent_doc = nlp(text)
@@ -406,10 +329,9 @@ def extract_travel_info(text, nlp, ner) -> dict:
 
     info["date"] = [ent.text for ent in sent_doc.ents if ent.label_ in ("DATE", "TIME")]
 
-    locations = set()  # use a set to auto-deduplicate
+    locations = set()
 
     for token in sent_doc:
-        # detect verbs like “went”, “travelled”, “journeyed”, even under adverbials (“After that they went…”)
         if token.lemma_.lower() in TRAVEL_WORDS:
             travel_verb = token
         elif token.head.lemma_.lower() in TRAVEL_WORDS:
@@ -417,14 +339,12 @@ def extract_travel_info(text, nlp, ner) -> dict:
         else:
             continue
    
-        # Case 1: prepositions directly attached to the verb
         for child in travel_verb.children:
             if child.dep_ == "prep" and child.lemma_ in ("from", "to", "toward", "into"):
                 for pobj in child.children:
                     if pobj.text in all_locations:
                         locations.add(pobj.text)
 
-        # Case 2: prepositions attached under a direction word like “west”
         for child in travel_verb.children:
             if child.text.lower() in DIRECTION_WORDS:
                 for gchild in child.subtree:
@@ -471,7 +391,7 @@ def days(time_text: str) -> int | None:
 
     try:
         tokens = time_text.split()
-        num = w2n.word_to_num(tokens[0])  # e.g. "ten" → 10
+        num = w2n.word_to_num(tokens[0])
         unit = tokens[1]
         if "day" in unit:
             return num

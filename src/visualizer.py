@@ -19,12 +19,12 @@ def plot_map(coords, distances, conflicts, direction_conflicts, with_routes):
             d = d[0]
             xa, ya = coords[a]
             xb, yb = coords[b]
-            plt.plot([xa, xb], [ya, yb], "k--", alpha=0.6)  # dashed line
+            plt.plot([xa, xb], [ya, yb], "k--", alpha=0.6)
             midx, midy = (xa+xb)/2, (ya+yb)/2
             plt.text(midx, midy, f"{d:.1f}", fontsize=8, color="gray")
 
             key = tuple(sorted((a, b)))
-            if key in conflicts : #I will eventually want to pass more information so that the user can hover over the warning and see what exactly is wrong
+            if key in conflicts : 
                 plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="orange")
                 plt.text(xa-50, ya+18, conflicts[key][1][1][0], fontsize=8, color="orange")
                 plt.text(xa-50, ya+55, conflicts[key][0][1][0], fontsize=8, color="orange")

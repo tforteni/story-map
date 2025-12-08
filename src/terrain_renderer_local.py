@@ -1,5 +1,4 @@
 import matplotlib
-matplotlib.use("Agg")  # for ngrok
 import matplotlib.pyplot as plt
 import numpy as np
 import tempfile
@@ -70,8 +69,5 @@ def draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
                          
     ax.axis("off")
 
-    tmp_dir = tempfile.gettempdir()
-    file_path = os.path.join(tmp_dir, "terrain_map.png")
-    fig.savefig(file_path, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-    return file_path
+    plt.savefig("map.png", dpi=300, bbox_inches="tight")  # best for submissions or reports
+    return
