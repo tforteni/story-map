@@ -147,8 +147,7 @@ def get_all_travel_info(paragraph: str):
       - direction follow-ups ("A is north of B.")
       - conflicting directions ("A is north of B. A is south of B.")
     """
-    # from src import config
-    #for now i am going to clear all entries
+
     config.all_entries = {} # clear past sentences, #i probably do want to remember past sentences i think. it correctly recognises conflicts when i do remember past sentences even if the info comes in two seperate requests! yay!!!! What I need now is to distinguish between the original sentence being changed (which should lead to the map being edited) and a new conflicting sentence being introduced (which currently correctly leads to a conflict being rendered)
     Entry.sentence_count = 1
 
@@ -323,12 +322,12 @@ def extract_directions(sent_doc, all_locations):
                 dir_word = None
                 origin, dest = None, None
 
-                # 1️⃣ find direction word (like 'north', 'west')
+                # find direction word (like 'north', 'west')
                 for child in token.children:
                     if child.dep_ in rule["direction_modifier"] and child.text.lower() in DIRECTION_WORDS:
                         dir_word = child.text.lower()
 
-                        # 2️⃣ search *inside* the direction word’s subtree for prepositions and locations
+                        # search *inside* the direction word’s subtree for prepositions and locations
                         for gchild in child.subtree:
                             if gchild.dep_ == "prep" and gchild.lemma_ in ("from", "to", "toward", "into"):
                                 for pobj in gchild.children:
@@ -338,7 +337,7 @@ def extract_directions(sent_doc, all_locations):
                                         elif gchild.lemma_ in ("to", "toward", "into"):
                                             dest = pobj.text
 
-                # 3️⃣ fallback: also look at direct verb children if needed
+                #fallback: also look at direct verb children if needed
                 if not origin or not dest:
                     for child in token.children:
                         if child.dep_ == "prep" and child.lemma_ in ("from", "to", "toward", "into"):
