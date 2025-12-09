@@ -23,11 +23,11 @@ cd story-map
 2. **Create a virtual environment (optional but recommended):**
 ```bash
 # macOS/Linux
-python -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate
 
 # Windows
-python -m venv venv
+python3.12 -m venv venv
 venv\Scripts\activate
 ```
 
@@ -39,8 +39,8 @@ pip install -r requirements.txt
 4. **Run the project locally**
 ```bash
 python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
+# e.g. python3 -m src.main data/example1.txt 1
 ```
-e.g. python3 -m src.main data/example1.txt 1
 
 You can run the program on your own text files. I suggest using simple sentences. The generated map will be called map.png and will be saved in the story-map directory.
 
