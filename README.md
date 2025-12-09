@@ -11,6 +11,10 @@ This project generates simple maps from narrative data using natural language pr
 ## Setup
 
 1. **Clone the repository:**
+My recommendation is to use Github Desktop but you can clone the repository through your preferred method.
+To use Github Desktop, click the green 'Code' then select 'Open with Github Desktop' and follow the prompts.
+
+ Alternatively, you can use the CLI:
 ```bash
 gh repo clone tforteni/story-map
 cd story-map
