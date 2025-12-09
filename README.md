@@ -1,7 +1,7 @@
 # Story Mapper
 
 ## Description
-This project generates maps from input text using a Flask API.
+This project generates simple maps from narrative data using natural language processing and constraint satisfaction.
 
 ## Requirements
 - Python 3.10+
@@ -12,8 +12,8 @@ This project generates maps from input text using a Flask API.
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/username/my_project.git
-cd my_project
+gh repo clone tforteni/story-map
+cd story-map
 ```
 
 2. **Create a virtual environment (optional but recommended):**
@@ -29,11 +29,15 @@ venv\Scripts\activate
 
 3. **Install the requirements:**
 ```bash
-   pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-4. **Run the project locallt**
+4. **Run the project locally**
 ```bash
-    python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
+python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
 ```
+e.g. python3 -m src.main data/example1.txt 1
+
+You can run the program on your own text files. I suggest using simple sentences. The generated map will be called map.png and will be saved in the story-map directory.
+
 
