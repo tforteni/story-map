@@ -1,2 +1,0 @@
-They travelled north from Rivenfell to Callahan. It took them 30 days. After that they went from Callahan to Mizani in 3 days. Mizani is east of Callahan.
-Testing cardinal directions and dates. Standard test.

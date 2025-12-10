@@ -18,6 +18,7 @@ To use Github Desktop, click the green 'Code' then select 'Open with Github Desk
 ```bash
 gh repo clone tforteni/story-map
 cd story-map
+cd code
 ```
 
 2. **Create a virtual environment (optional but recommended):**
@@ -42,6 +43,6 @@ python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
 # e.g. python3 -m src.main data/example1.txt 1
 ```
 
-You can run the program on your own text files. I suggest using simple sentences. The generated map will be called map.png and will be saved in the story-map directory.
+You can run the program on your own text files. I suggest using simple sentences. The generated map will be called map.png and will be saved in the code directory.
 
 
