@@ -19,7 +19,7 @@ To use Github Desktop, click the green 'Code' then select 'Open with Github Desk
 gh repo clone tforteni/story-map
 ```
 
-If you are working with the source code you can skip this step.
+If you are working with the source code you can skip to step 2.
 
 2. **Change to the code directory:**
 ```bash
