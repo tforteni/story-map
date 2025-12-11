@@ -17,11 +17,17 @@ To use Github Desktop, click the green 'Code' then select 'Open with Github Desk
  Alternatively, you can use the CLI:
 ```bash
 gh repo clone tforteni/story-map
+```
+
+If you are working with the source code you can skip this step.
+
+2. **Change to the code directory:**
+```bash
 cd story-map
 cd code
 ```
 
-2. **Create a virtual environment (optional but recommended):**
+3. **Create a virtual environment (optional but recommended):**
 ```bash
 # macOS/Linux
 python3.12 -m venv venv
@@ -32,12 +38,12 @@ python3.12 -m venv venv
 venv\Scripts\activate
 ```
 
-3. **Install the requirements:**
+4. **Install the requirements:**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Run the project locally**
+5. **Run the project locally**
 ```bash
 python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
 # e.g. python3 -m src.main data/example1.txt 1
