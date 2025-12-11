@@ -1,2 +1,2 @@
-They went from Callahan to Rivenfell. They went from Callahan to Rivenfell in two days.
-Checking that there is no conflict between a default and real distance.
+They went from Mizani to Lok. Mizani is north of Lok. They went from Erendale to Camelot. Camelot is west of Lok.
+Testing various related cardinal directions.

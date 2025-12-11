@@ -54,7 +54,6 @@ def draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
     for name, (x, y) in norm_coords.items():
         ax.text(x, y, name, ha="center", va="center", color="black")
 
-    
     for (a, b), d in distances.items():
         d = d[0]
         xa, ya = norm_coords[a]
@@ -64,9 +63,9 @@ def draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
             midx, midy = (xa+xb)/2, (ya+yb)/2
             plt.text(midx, midy, f"{d:.1f}", fontsize=8, color="gray")
 
-    s_key = tuple(sorted((a, b)))
-    if s_key in conflicts or s_key in direction_conflicts:
-        plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="red")
+        s_key = tuple(sorted((a, b)))
+        if s_key in conflicts or s_key in direction_conflicts:
+            plt.text(xa+0.6, ya+8, "⚠️", fontsize=16, color="red")
                          
     ax.axis("off")
 

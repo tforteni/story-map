@@ -324,8 +324,9 @@ def extract_travel_info(text, nlp, ner) -> dict:
     all_locations = [ent["word"] for ent in entities if ent.get("entity_group") == "LOC"]
 
     sent_doc = nlp(text)
-    for token in sent_doc:
-        print(token.text, token.dep_, token.head.text, token.pos_)
+    # Debug text
+    # for token in sent_doc:
+    #     print(token.text, token.dep_, token.head.text, token.pos_)
 
     info["date"] = [ent.text for ent in sent_doc.ents if ent.label_ in ("DATE", "TIME")]
 

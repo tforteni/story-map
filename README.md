@@ -41,8 +41,11 @@ pip install -r requirements.txt
 ```bash
 python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
 # e.g. python3 -m src.main data/example1.txt 1
+# example15.txt, example18.txt, and example19.txt are fun ones to try!
 ```
 
 You can run the program on your own text files. I suggest using simple sentences. The generated map will be called map.png and will be saved in the code directory.
+
+The Google Docs integration code in the google-docs-integration folder is not able to be run locally but is included for reference.
 
 

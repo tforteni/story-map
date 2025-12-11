@@ -1,2 +1,2 @@
-They went from Callahan to Rivenfell in two weeks. They went from Callahan to Rivenfell. They went from Callahan to Rivenfell in two days.
-Checking that a default in the middle still lets a conflict be flagged
+They went from Callahan to Rivenfell. It took 30 days.
+Testing travel information split between sentences.

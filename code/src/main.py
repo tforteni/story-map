@@ -25,7 +25,11 @@ def main():
     map_file_path = terrain_renderer_local.draw_terrain(coords, distances, conflicts, direction_conflicts, with_routes)
 
     all_conflicts = solver.remove_exact_duplicate_pairs(solver.extract_all_conflict_sentence_pairs(conflicts, direction_conflicts))
-
+    print("Conflicts: ")
+    if all_conflicts:
+        print(all_conflicts)
+    else:
+        print("None")
     return map_file_path, all_conflicts
 
 if __name__=="__main__":

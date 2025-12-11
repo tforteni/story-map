@@ -1,2 +1,2 @@
-After that they went to Callahan which is north of Mizani. 
-Testing direction (positional rule) with sentence beginning with a preposition - so the sentence tree is different.
+The party travelled north from Erendale to Camelot in 30 days on foot. He travelled north from Rivenfell to Callahan. Then he went east from Callahan to Camelot in 50 days on foot. After that, he went from Erendale to Rivenfell in one day.
+Testing lots of various directions and distances

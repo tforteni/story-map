@@ -1,2 +1,2 @@
-They went from Callahan to Rivenfell. It took 30 days.
-Testing travel information split between sentences.
+They went from Callahan to Rivenfell.
+Checking that default distance works

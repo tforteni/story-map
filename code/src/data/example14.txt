@@ -1,2 +1,2 @@
-After that they went west from Callahan to Mizani in 2 weeks. 
-Testing direction (travel rule) with a preposition starting the sentence.
+They went from Mizani to Lok. Mizani is north of Lok. They went from Erendale to Camelot. Camelot is west of Lok. Erendale is east of Lok.
+Testing various related cardinal directions.
