@@ -57,4 +57,12 @@ You can run the program on your own text files. I suggest using simple sentences
 
 The Google Docs integration code in the google-docs-integration folder is not able to be run locally but is included for reference.
 
+## Example Gallery
+
+
+https://github.com/user-attachments/assets/8f46f5e3-e1d7-4d38-8472-99471a061789
+
+
+<img width="1470" height="497" alt="Screenshot 2025-11-29 at 1 11 39 PM" src="https://github.com/user-attachments/assets/8e0f6b78-2237-4a28-8c50-e7074ac53e0e" />
+<img width="1470" height="588" alt="Screenshot 2025-11-29 at 1 27 40 PM" src="https://github.com/user-attachments/assets/0fdef762-7d4c-4361-bd23-1df8c7322a04" />
 
