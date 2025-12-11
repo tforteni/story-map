@@ -49,7 +49,7 @@ pip install -r requirements.txt
 5. **Run the project locally**
 ```bash
 python3 -m src.main INPUT_FILE WITH_ROUTES(1 or 0)
-# e.g. python3 -m src.main data/example1.txt 1
+# e.g. python3 -m src.main src/data/example1.txt 1
 # example15.txt, example18.txt, and example19.txt are fun ones to try!
 ```
 
